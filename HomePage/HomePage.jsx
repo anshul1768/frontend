@@ -16,7 +16,7 @@ const HomePage = () => {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3000/api/create", {
+      const res = await fetch("https://url-shortner-backend-fpm3.onrender.com/api/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),

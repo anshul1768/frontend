@@ -15,7 +15,7 @@ const Login = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:3000/api/user/login", {
+      const res = await fetch("https://url-shortner-backend-fpm3.onrender.com/api/user/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
