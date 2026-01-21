@@ -1,30 +1,58 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Register = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ✅ normal logic
+    // ✅ Simple validation
     if (!username || !email || !password) {
       alert("All fields are required!");
       return;
     }
 
-    // data ready (API later)
-    const userData = { username, email, password };
-    console.log("Register Data:", userData);
+    setLoading(true);
 
-    alert("Registered Successfully ✅");
+    try {
+      const res = await fetch(
+        "https://url-shortner-backend-fpm3.onrender.com/api/user/register",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, email, password }),
+          credentials: "include",
+        }
+      );
 
-    // clear form
-    setUsername("");
-    setEmail("");
-    setPassword("");
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data?.message || "Registration Failed ❌");
+        return;
+      }
+
+      alert(data?.message || "User created successfully ✅");
+
+      // ✅ clear
+      setUsername("");
+      setEmail("");
+      setPassword("");
+
+      // ✅ redirect to login
+      navigate("/login");
+    } catch (error) {
+      console.log(error);
+      alert("Server Error ❌");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -85,9 +113,10 @@ const Register = () => {
           {/* Button */}
           <button
             type="submit"
-            className="w-full py-3 rounded-xl bg-green-600 text-white font-bold hover:bg-green-700 transition"
+            disabled={loading}
+            className="w-full py-3 rounded-xl bg-green-600 text-white font-bold hover:bg-green-700 transition disabled:opacity-60"
           >
-            Register
+            {loading ? "Creating..." : "Register"}
           </button>
         </form>
 
