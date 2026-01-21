@@ -33,7 +33,7 @@ const HomePage = () => {
 
       // ✅ because ApiResponse sends data in result.data
       const shortCode = result?.data; // nanoid(7)
-      const fullShortUrl = `http://localhost:3000/api/redirect/${shortCode}`;
+      const fullShortUrl = `https://url-shortner-backend-fpm3.onrender.com/api/redirect/${shortCode}`;
 
       setShortUrl(fullShortUrl);
       setUrl("");
