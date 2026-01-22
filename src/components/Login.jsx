@@ -15,18 +15,26 @@ const Login = () => {
     }
 
     try {
-      const res = await fetch("https://url-shortner-backend-fpm3.onrender.com/api/user/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-        credentials: "include", // ✅ cookie store in browser (if backend sends cookie)
-      });
+      const res = await fetch(
+        "https://url-shortner-backend-fpm3.onrender.com/api/user/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+          credentials: "include", // ✅ cookie store in browser (if backend sends cookie)
+        },
+      );
 
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.message || "Login Failed ❌");
-        navigate("/register")
+        if (data?.statusCode === 401 || res.status === 401) {
+          alert("User not found! Please register ✅");
+          navigate("/register");
+          return;
+        }
+        alert("Login Failed ❌");
+        return;
       }
 
       alert("Login Successful ✅");
