@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 const BACKEND = "https://url-shortner-backend-fpm3.onrender.com";
-
+// const BACKEND="http://localhost:3000"
 const HomePage = () => {
   const [url, setUrl] = useState("");
   const [shortUrl, setShortUrl] = useState("");
@@ -21,7 +21,7 @@ const HomePage = () => {
       });
 
       const result = await res.json();
-
+      console.log(result);
       if (res.ok) {
         setMyUrls(result?.data || []);
       } else {
@@ -170,7 +170,7 @@ const HomePage = () => {
           ) : (
             <div className="mt-6 grid grid-cols-1 gap-4">
               {myUrls.map((item) => {
-                const redirectLink = `${BACKEND}/api/user/${item.shortId}`;
+                const redirectLink = `${BACKEND}/api/user/${item.short_url}`;
 
                 return (
                   <div
@@ -178,7 +178,7 @@ const HomePage = () => {
                     className="bg-white border shadow-sm rounded-3xl p-5"
                   >
                     <p className="font-bold text-gray-900 break-all">
-                      Original: {item.fullUrl}
+                      Original: {item.full_url}
                     </p>
 
                     <p className="mt-2 text-green-700 font-extrabold break-all">

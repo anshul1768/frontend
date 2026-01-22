@@ -10,6 +10,7 @@ const ProtectedLayout = () => {
       try {
         const res = await fetch(
           `https://url-shortner-backend-fpm3.onrender.com/api/user/me`,
+          // `http://localhost:3000/api/user/me`,
           {
             method: "GET",
             credentials: "include",
