@@ -26,7 +26,7 @@ const Login = () => {
 
       if (!res.ok) {
         alert(data.message || "Login Failed ❌");
-        return;
+        navigate("/register")
       }
 
       alert("Login Successful ✅");
