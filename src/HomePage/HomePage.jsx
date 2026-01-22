@@ -7,11 +7,10 @@ const HomePage = () => {
   const [shortUrl, setShortUrl] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ✅ my urls
   const [myUrls, setMyUrls] = useState([]);
   const [fetchingUrls, setFetchingUrls] = useState(true);
 
-  // ✅ displayUrl call (because /me -> verifyJWT -> displayUrl)
+  // ✅ Fetch user urls (displayUrl)
   const fetchMyUrls = async () => {
     try {
       setFetchingUrls(true);
@@ -24,7 +23,6 @@ const HomePage = () => {
       const result = await res.json();
 
       if (res.ok) {
-        // ✅ ApiResponse(200, urls, ...)
         setMyUrls(result?.data || []);
       } else {
         setMyUrls([]);
@@ -36,7 +34,6 @@ const HomePage = () => {
     }
   };
 
-  // ✅ when page loads, load user urls
   useEffect(() => {
     fetchMyUrls();
   }, []);
@@ -66,16 +63,13 @@ const HomePage = () => {
         return;
       }
 
-      const shortCode = result?.data; // nanoid(7)
-
-      // ✅ better redirect link
-      const fullShortUrl = `${BACKEND}/api/user/r/${shortCode}`;
-      // (agar tune route /r/:shortUrl kiya hai toh: `${BACKEND}/r/${shortCode}`)
+      const shortCode = result?.data;
+      const fullShortUrl = `${BACKEND}/api/user/${shortCode}`; // ✅ your route
 
       setShortUrl(fullShortUrl);
       setUrl("");
 
-      // ✅ refresh urls list after creating
+      // ✅ refresh list
       fetchMyUrls();
     } catch (error) {
       console.log(error);
@@ -152,7 +146,7 @@ const HomePage = () => {
           </div>
         )}
 
-        {/* ✅ MY URLS (displayUrl results) */}
+        {/* ✅ MY URLS */}
         <div className="mt-14 max-w-5xl mx-auto">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-extrabold text-gray-900">
@@ -176,7 +170,8 @@ const HomePage = () => {
           ) : (
             <div className="mt-6 grid grid-cols-1 gap-4">
               {myUrls.map((item) => {
-                const redirectLink = `${BACKEND}/api/user/r/${item.shortId}`;
+                const redirectLink = `${BACKEND}/api/user/${item.shortId}`;
+
                 return (
                   <div
                     key={item._id}
@@ -190,7 +185,12 @@ const HomePage = () => {
                       Short: {redirectLink}
                     </p>
 
-                    <div className="mt-4 flex gap-3">
+                    {/* ✅ Clicks */}
+                    <p className="mt-2 text-gray-700 font-bold">
+                      Clicks: <span className="text-green-600">{item.clicks}</span>
+                    </p>
+
+                    <div className="mt-4 flex gap-3 flex-wrap">
                       <a
                         href={redirectLink}
                         target="_blank"
@@ -212,30 +212,6 @@ const HomePage = () => {
               })}
             </div>
           )}
-        </div>
-
-        {/* ✅ FEATURES */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white border shadow-sm rounded-3xl p-6">
-            <h3 className="text-xl font-extrabold text-gray-900">⚡ Fast</h3>
-            <p className="mt-2 text-gray-600">
-              Generate short links instantly with quick response time.
-            </p>
-          </div>
-
-          <div className="bg-white border shadow-sm rounded-3xl p-6">
-            <h3 className="text-xl font-extrabold text-gray-900">🔒 Secure</h3>
-            <p className="mt-2 text-gray-600">
-              Your data stays safe with authentication and protected APIs.
-            </p>
-          </div>
-
-          <div className="bg-white border shadow-sm rounded-3xl p-6">
-            <h3 className="text-xl font-extrabold text-gray-900">📊 Analytics</h3>
-            <p className="mt-2 text-gray-600">
-              Track clicks and performance of your shortened URLs.
-            </p>
-          </div>
         </div>
       </div>
     </section>
