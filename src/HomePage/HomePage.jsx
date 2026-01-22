@@ -1,9 +1,45 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
+const BACKEND = "https://url-shortner-backend-fpm3.onrender.com";
 
 const HomePage = () => {
   const [url, setUrl] = useState("");
   const [shortUrl, setShortUrl] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // ✅ my urls
+  const [myUrls, setMyUrls] = useState([]);
+  const [fetchingUrls, setFetchingUrls] = useState(true);
+
+  // ✅ displayUrl call (because /me -> verifyJWT -> displayUrl)
+  const fetchMyUrls = async () => {
+    try {
+      setFetchingUrls(true);
+
+      const res = await fetch(`${BACKEND}/api/user/me`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        // ✅ ApiResponse(200, urls, ...)
+        setMyUrls(result?.data || []);
+      } else {
+        setMyUrls([]);
+      }
+    } catch (error) {
+      setMyUrls([]);
+    } finally {
+      setFetchingUrls(false);
+    }
+  };
+
+  // ✅ when page loads, load user urls
+  useEffect(() => {
+    fetchMyUrls();
+  }, []);
 
   const handleShorten = async (e) => {
     e.preventDefault();
@@ -16,27 +52,31 @@ const HomePage = () => {
     setLoading(true);
 
     try {
-      const res = await fetch("https://url-shortner-backend-fpm3.onrender.com/api/create", {
+      const res = await fetch(`${BACKEND}/api/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
-        credentials: "include", // ✅ if auth cookie required
+        credentials: "include",
       });
 
       const result = await res.json();
 
       if (!res.ok) {
         alert(result?.message || "Failed to create short URL ❌");
-        setLoading(false);
         return;
       }
 
-      // ✅ because ApiResponse sends data in result.data
       const shortCode = result?.data; // nanoid(7)
-      const fullShortUrl = `https://url-shortner-backend-fpm3.onrender.com/api/redirect/${shortCode}`;
+
+      // ✅ better redirect link
+      const fullShortUrl = `${BACKEND}/api/user/r/${shortCode}`;
+      // (agar tune route /r/:shortUrl kiya hai toh: `${BACKEND}/r/${shortCode}`)
 
       setShortUrl(fullShortUrl);
       setUrl("");
+
+      // ✅ refresh urls list after creating
+      fetchMyUrls();
     } catch (error) {
       console.log(error);
       alert("Something went wrong!");
@@ -45,15 +85,15 @@ const HomePage = () => {
     }
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(shortUrl);
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text);
     alert("Copied ✅");
   };
 
   return (
     <section className="min-h-screen bg-gray-50">
-      {/* ✅ HERO */}
       <div className="max-w-7xl mx-auto px-4 py-16">
+        {/* ✅ HERO */}
         <div className="text-center">
           <p className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-100 text-green-700 font-bold text-sm border border-green-200">
             🔗 Fast & Secure URL Shortener
@@ -104,13 +144,75 @@ const HomePage = () => {
             </a>
 
             <button
-              onClick={handleCopy}
+              onClick={() => handleCopy(shortUrl)}
               className="px-5 py-2 rounded-2xl bg-gray-900 text-white font-bold hover:bg-black transition"
             >
               Copy
             </button>
           </div>
         )}
+
+        {/* ✅ MY URLS (displayUrl results) */}
+        <div className="mt-14 max-w-5xl mx-auto">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-extrabold text-gray-900">
+              Your Created URLs
+            </h2>
+
+            <button
+              onClick={fetchMyUrls}
+              className="px-4 py-2 rounded-2xl bg-white border font-bold hover:bg-gray-100"
+            >
+              Refresh
+            </button>
+          </div>
+
+          {fetchingUrls ? (
+            <p className="mt-4 text-gray-600 font-bold">Loading urls...</p>
+          ) : myUrls.length === 0 ? (
+            <p className="mt-4 text-gray-600">
+              You haven’t created any URLs yet.
+            </p>
+          ) : (
+            <div className="mt-6 grid grid-cols-1 gap-4">
+              {myUrls.map((item) => {
+                const redirectLink = `${BACKEND}/api/user/r/${item.shortId}`;
+                return (
+                  <div
+                    key={item._id}
+                    className="bg-white border shadow-sm rounded-3xl p-5"
+                  >
+                    <p className="font-bold text-gray-900 break-all">
+                      Original: {item.fullUrl}
+                    </p>
+
+                    <p className="mt-2 text-green-700 font-extrabold break-all">
+                      Short: {redirectLink}
+                    </p>
+
+                    <div className="mt-4 flex gap-3">
+                      <a
+                        href={redirectLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-4 py-2 rounded-2xl bg-green-600 text-white font-bold hover:bg-green-700 transition"
+                      >
+                        Open
+                      </a>
+
+                      <button
+                        onClick={() => handleCopy(redirectLink)}
+                        className="px-4 py-2 rounded-2xl bg-gray-900 text-white font-bold hover:bg-black transition"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         {/* ✅ FEATURES */}
         <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -134,20 +236,6 @@ const HomePage = () => {
               Track clicks and performance of your shortened URLs.
             </p>
           </div>
-        </div>
-
-        {/* ✅ CTA */}
-        <div className="mt-16 rounded-3xl bg-gradient-to-r from-green-600 to-emerald-500 text-white p-10 text-center shadow-lg">
-          <h2 className="text-3xl font-extrabold">
-            Ready to shorten your links?
-          </h2>
-          <p className="mt-3 text-white/90 max-w-2xl mx-auto">
-            Create an account to manage your URLs and track analytics in one
-            place.
-          </p>
-          <button className="mt-6 px-8 py-3 rounded-2xl bg-white text-green-700 font-extrabold hover:bg-gray-100 transition">
-            Get Started
-          </button>
         </div>
       </div>
     </section>
