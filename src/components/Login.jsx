@@ -25,7 +25,7 @@ const Login = () => {
         },
       );
 
-      const data = await res.json();
+      const data = await res.text();
 
       if (!res.ok) {
         if (data?.statusCode === 401 || res.status === 401) {
