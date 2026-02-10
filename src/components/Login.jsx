@@ -16,7 +16,7 @@ const Login = () => {
 
     try {
       const res = await fetch(
-        "https://url-shortner-backend-fpm3.onrender.com/api/user/login",
+        "https://url-shortner-backend-fpm3.onrender.com/api/user/login" || "http://localhost:3000/api/user/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -24,7 +24,7 @@ const Login = () => {
           credentials: "include", // ✅ cookie store in browser (if backend sends cookie)
         },
       );
-
+      console.log(res);
       const data = await res.text();
 
       if (!res.ok) {

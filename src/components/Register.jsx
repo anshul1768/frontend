@@ -22,7 +22,7 @@ const Register = () => {
 
     try {
       const res = await fetch(
-        "https://url-shortner-backend-fpm3.onrender.com/api/user/register",
+        "https://url-shortner-backend-fpm3.onrender.com/api/user/register"|| "http://localhost:3000/api/user/register",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
